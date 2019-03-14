@@ -1,6 +1,36 @@
 from enum import Enum
 from queue import PriorityQueue
 import numpy as np
+from bresenham import bresenham
+
+
+def check_cells(grid, cells):
+    obstacle = False
+    for cell in cells:
+        if grid[cell[0], cell[1]] == 1:
+            obstacle = True
+            break
+    return obstacle
+
+
+def prune_path(grid, path):
+    pruned_path = [path[0]]
+    prev = path[0]
+    A = path[0]
+
+    for B in path:
+        # print("A,B", A, B)
+
+        cells = list(bresenham(A[0], A[1], int(B[0]), int(B[1])))
+
+        if check_cells(grid, cells):
+            # print("found path to", prev)
+            pruned_path.append(prev)
+            A = prev
+        prev = B
+
+    pruned_path.append(path[-1])
+    return pruned_path
 
 
 def create_grid(data, drone_altitude, safety_distance):
