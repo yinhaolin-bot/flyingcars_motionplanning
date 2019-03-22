@@ -23,7 +23,6 @@ class States(Enum):
 
 
 class BackyardFlyer(Drone):
-
     def __init__(self, connection):
         super().__init__(connection)
         self.target_position = np.array([0.0, 0.0, 0.0])
@@ -45,7 +44,10 @@ class BackyardFlyer(Drone):
                 self.all_waypoints = self.calculate_box()
                 self.waypoint_transition()
         elif self.flight_state == States.WAYPOINT:
-            if np.linalg.norm(self.target_position[0:2] - self.local_position[0:2]) < 1.0:
+            if (
+                np.linalg.norm(self.target_position[0:2] - self.local_position[0:2])
+                < 1.0
+            ):
                 if len(self.all_waypoints) > 0:
                     self.waypoint_transition()
                 else:
@@ -71,15 +73,21 @@ class BackyardFlyer(Drone):
 
     def calculate_box(self):
         print("Setting Home")
-        local_waypoints = [[10.0, 0.0, 3.0], [10.0, 10.0, 3.0], [0.0, 10.0, 3.0], [0.0, 0.0, 3.0]]
+        local_waypoints = [
+            [10.0, 0.0, 3.0],
+            [10.0, 10.0, 3.0],
+            [0.0, 10.0, 3.0],
+            [0.0, 0.0, 3.0],
+        ]
         return local_waypoints
 
     def arming_transition(self):
         print("arming transition")
         self.take_control()
         self.arm()
-        self.set_home_position(self.global_position[0], self.global_position[1],
-                               self.global_position[2])  # set the current location to be the home position
+        self.set_home_position(
+            self.global_position[0], self.global_position[1], self.global_position[2]
+        )  # set the current location to be the home position
 
         self.flight_state = States.ARMING
 
@@ -94,8 +102,13 @@ class BackyardFlyer(Drone):
     def waypoint_transition(self):
         print("waypoint transition")
         self.target_position = self.all_waypoints.pop(0)
-        print('target position', self.target_position)
-        self.cmd_position(self.target_position[0], self.target_position[1], self.target_position[2], 0.0)
+        print("target position", self.target_position)
+        self.cmd_position(
+            self.target_position[0],
+            self.target_position[1],
+            self.target_position[2],
+            0.0,
+        )
         self.flight_state = States.WAYPOINT
 
     def landing_transition(self):
@@ -132,8 +145,8 @@ class BackyardFlyer(Drone):
 
 
 if __name__ == "__main__":
-    conn = MavlinkConnection('tcp:127.0.0.1:5760', threaded=False, PX4=False)
-    #conn = WebSocketConnection('ws://127.0.0.1:5760')
+    conn = MavlinkConnection("tcp:127.0.0.1:5760", threaded=False, PX4=False)
+    # conn = WebSocketConnection('ws://127.0.0.1:5760')
     drone = BackyardFlyer(conn)
     time.sleep(2)
     drone.start()
